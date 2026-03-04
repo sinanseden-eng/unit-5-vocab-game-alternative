@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit 5: Museum of Language Games</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ds-green: #006633; /* Darüşşafaka Green */
+            --museum-gold: #d4af37;
+            --museum-navy: #0f172a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--museum-navy);
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, .font-display {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+        }
+
+        /* Glassmorphism Panels */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .gold-border {
+            border-top: 4px solid var(--museum-gold);
+        }
+        .green-border {
+            border-top: 4px solid var(--ds-green);
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in { animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+
+        /* Buttons */
+        .game-btn { transition: all 0.2s ease; }
+        .game-btn:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .game-btn:active { transform: translateY(1px); }
+
+        /* Hangman Tiles */
+        .letter-tile {
+            width: 3rem; height: 3.5rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-family: 'Cinzel', serif; font-weight: 700;
+            border-radius: 0.5rem; user-select: none; text-transform: uppercase;
+        }
+        .letter-tile.empty { background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.2); }
+        .letter-tile.filled { background: linear-gradient(to bottom right, var(--museum-gold), #b4851e); color: #000; box-shadow: 0 4px 0 #8a6414; }
+
+        /* Timer Bar */
+        .timer-container { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 1rem; }
+        .timer-bar { height: 100%; background: var(--museum-gold); transition: width 1s linear, background-color 0.3s; }
+
+        /* View Management */
+        .view { display: none; }
+        .view.active { display: block; }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center justify-center">
+
+    <!-- Ambient Texture -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/stardust.png');"></div>
+
+    <div class="w-full max-w-7xl relative z-10">
+        
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" class="view active animate-pop-in">
+            <!-- Header with Logo -->
+            <div class="flex flex-col items-center mb-12">
+                <div class="bg-white p-3 rounded-xl shadow-lg mb-6 border-b-4" style="border-color: var(--ds-green);">
+                    <!-- Replace src with "image_1b31bc.png" if in same folder -->
+                    <img src="https://via.placeholder.com/200x60/ffffff/006633?text=Darüşşafaka+Logo" alt="Darüşşafaka Logo" class="h-12 object-contain" id="school-logo">
+                </div>
+                <h1 class="text-4xl md:text-6xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600 text-center mb-3">Unit 5: Museum Vocabulary</h1>
+                <p class="text-lg text-slate-400 uppercase tracking-widest font-bold">Interactive Collocation & Grammar Arena</p>
+            </div>
+
+            <!-- Game Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Game 1: Collocation Connect -->
+                <div class="glass green-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('collocations')">
+                    <div class="text-5xl mb-4">🔗</div>
+                    <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">Collocation Connect</h2>
+                    <p class="text-slate-300 text-sm mb-6">Match the correct verbs and adjectives to the Unit 5 target nouns before time runs out!</p>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
+                </div>
+
+                <!-- Game 2: Hangman -->
+                <div class="glass gold-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('hangman')">
+                    <div class="text-5xl mb-4">🏺</div>
+                    <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">The Excavation</h2>
+                    <p class="text-slate-300 text-sm mb-6">Guess the Unit 5 vocabulary word or collocation letter by letter to unearth the artifact.</p>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
+                </div>
+
+                <!-- Game 3: Sentence Clash -->
+                <div class="glass green-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('clash')">
+                    <div class="text-5xl mb-4">⚔️</div>
+                    <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">Sentence Clash</h2>
+                    <p class="text-slate-300 text-sm mb-6">Team vs Team! Construct a perfect sentence using a random Modal Verb + Collocation.</p>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
+                </div>
+
+                <!-- Game 4: Jeopardy -->
+                <div class="glass gold-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('jeopardy')">
+                    <div class="text-5xl mb-4">🏛️</div>
+                    <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">Sentence Jeopardy</h2>
+                    <p class="text-slate-300 text-sm mb-6">The ultimate board. Fix errors, match collocations, and construct sentences for points.</p>
+                    <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: COLLOCATION CONNECT -->
+        <!-- ========================================== -->
+        <div id="view-collocations" class="view">
+            <div class="glass green-border rounded-3xl p-6 md:p-10 relative max-w-4xl mx-auto text-center">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-slate-400 hover:text-white font-bold tracking-widest text-sm uppercase">← Exit</button>
+                    <div class="text-2xl font-display text-emerald-400" id="col-score">Score: 0</div>
+                </div>
+                
+                <div class="timer-container"><div id="col-timer-bar" class="timer-bar" style="width: 100%;"></div></div>
+                
+                <div id="col-play-area" class="animate-pop-in mt-8">
+                    <p class="text-slate-400 text-sm font-bold uppercase tracking-widest mb-2">Which word pairs with:</p>
+                    <h2 id="col-target-word" class="text-4xl md:text-6xl font-black text-white mb-10 tracking-widest uppercase">TARGET</h2>
+                    
+                    <div id="col-options" class="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: HANGMAN (THE EXCAVATION) -->
+        <!-- ========================================== -->
+        <div id="view-hangman" class="view">
+            <div class="glass gold-border rounded-3xl p-6 md:p-10 relative max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-slate-400 hover:text-white font-bold tracking-widest text-sm uppercase">← Exit</button>
+                    <div class="text-xl font-display text-yellow-400" id="hm-score">Score: 0</div>
+                </div>
+                
+                <div id="hm-play-area" class="animate-pop-in text-center flex flex-col items-center">
+                    <div class="bg-black/30 border border-white/10 p-6 rounded-xl w-full mb-6 relative">
+                        <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-black text-xs font-bold uppercase tracking-widest py-1 px-3 rounded">Clue</span>
+                        <h3 id="hm-clue" class="text-xl text-white font-medium italic"></h3>
+                    </div>
+
+                    <div class="mb-4">
+                        <p class="text-xs text-slate-400 uppercase tracking-widest mb-2 font-bold">Brushes Remaining</p>
+                        <div class="flex gap-2 text-3xl" id="hm-lives-display"></div>
+                    </div>
+
+                    <div class="mb-8 w-full"><div id="hm-slots" class="flex flex-wrap justify-center gap-2 min-h-[3.5rem]"></div></div>
+                    
+                    <div class="w-full bg-slate-800/50 p-4 rounded-xl border border-slate-700 mb-6">
+                        <div id="hm-keyboard" class="flex flex-wrap justify-center gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: SENTENCE CLASH -->
+        <!-- ========================================== -->
+        <div id="view-clash" class="view">
+            <div class="glass green-border rounded-3xl p-6 md:p-10 relative max-w-5xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-slate-400 hover:text-white font-bold tracking-widest text-sm uppercase">← Exit</button>
+                    <div class="text-xl font-display text-white">Sentence Clash</div>
+                </div>
+
+                <!-- Scoreboard -->
+                <div class="grid grid-cols-2 gap-8 mb-8">
+                    <div class="bg-blue-900/40 border border-blue-500/50 rounded-2xl p-4 text-center">
+                        <h3 class="text-blue-400 font-display text-2xl mb-2">TEAM A</h3>
+                        <div class="text-6xl font-black text-white mb-4" id="clash-score-a">0</div>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="updateClashScore('A', -5)" class="bg-slate-700 text-white w-10 h-10 rounded font-bold hover:bg-slate-600">-</button>
+                            <button onclick="updateClashScore('A', 10)" class="bg-blue-600 text-white w-10 h-10 rounded font-bold hover:bg-blue-500">+</button>
+                        </div>
+                    </div>
+                    <div class="bg-rose-900/40 border border-rose-500/50 rounded-2xl p-4 text-center">
+                        <h3 class="text-rose-400 font-display text-2xl mb-2">TEAM B</h3>
+                        <div class="text-6xl font-black text-white mb-4" id="clash-score-b">0</div>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="updateClashScore('B', -5)" class="bg-slate-700 text-white w-10 h-10 rounded font-bold hover:bg-slate-600">-</button>
+                            <button onclick="updateClashScore('B', 10)" class="bg-rose-600 text-white w-10 h-10 rounded font-bold hover:bg-rose-500">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generator Area -->
+                <div class="bg-black/40 border border-slate-600 rounded-2xl p-8 text-center">
+                    <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using both elements</p>
+                    
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-8">
+                        <!-- Element 1: Grammar -->
+                        <div class="bg-purple-900/60 border-2 border-purple-500 p-6 rounded-xl w-full md:w-1/3 shadow-lg">
+                            <span class="text-[10px] text-purple-300 uppercase tracking-widest block mb-2">Grammar (Modals)</span>
+                            <span id="clash-grammar" class="text-2xl font-black text-white uppercase tracking-wider">?</span>
+                        </div>
+                        
+                        <div class="text-4xl text-slate-500 font-black">+</div>
+                        
+                        <!-- Element 2: Collocation -->
+                        <div class="bg-emerald-900/60 border-2 border-emerald-500 p-6 rounded-xl w-full md:w-1/3 shadow-lg">
+                            <span class="text-[10px] text-emerald-300 uppercase tracking-widest block mb-2">Collocation</span>
+                            <span id="clash-vocab" class="text-2xl font-black text-white uppercase tracking-wider">?</span>
+                        </div>
+                    </div>
+
+                    <button onclick="generateClashPrompt()" class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-display font-bold text-xl py-4 px-12 rounded-full shadow-[0_5px_0_#a16207] active:translate-y-1 active:shadow-none transition-all">
+                        Draw New Prompt
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: SENTENCE JEOPARDY -->
+        <!-- ========================================== -->
+        <div id="view-jeopardy" class="view">
+            <div class="glass gold-border rounded-3xl p-6 md:p-8 relative max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="showView('dashboard')" class="text-slate-400 hover:text-white font-bold tracking-widest text-sm uppercase">← Exit</button>
+                    <div class="flex gap-6">
+                        <div class="text-xl font-bold text-blue-400 font-display">Team A: <span id="jeop-score-a" class="text-white">0</span></div>
+                        <div class="text-xl font-bold text-rose-400 font-display">Team B: <span id="jeop-score-b" class="text-white">0</span></div>
+                    </div>
+                </div>
+
+                <!-- Jeopardy Grid -->
+                <div class="bg-slate-900 p-2 rounded-xl border border-slate-700 shadow-2xl overflow-x-auto">
+                    <div id="jeopardy-board" class="min-w-[800px] grid grid-cols-4 gap-2">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Jeopardy Modal -->
+                <div id="jeop-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div class="bg-slate-800 p-10 rounded-2xl border-2 border-yellow-500 max-w-3xl w-full text-center relative shadow-2xl">
+                        <h3 id="jeop-cat-val" class="text-yellow-500 font-display text-xl mb-6 uppercase tracking-widest border-b border-slate-700 pb-4"></h3>
+                        <p id="jeop-q-text" class="text-white text-3xl md:text-4xl font-serif mb-10 leading-relaxed"></p>
+                        
+                        <div id="jeop-answer-area" class="hidden">
+                            <p class="text-emerald-400 text-sm font-bold uppercase tracking-widest mb-2">Answer / Target Sentence:</p>
+                            <p id="jeop-a-text" class="text-white text-2xl mb-10 font-medium"></p>
+                            
+                            <p class="text-slate-400 text-xs font-bold uppercase mb-4 tracking-widest">Award Points To:</p>
+                            <div class="flex justify-center gap-4">
+                                <button onclick="awardJeopardy(1)" class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded transition text-lg">Team A</button>
+                                <button onclick="awardJeopardy(2)" class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-8 rounded transition text-lg">Team B</button>
+                                <button onclick="awardJeopardy(0)" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-8 rounded transition text-lg">Nobody</button>
+                            </div>
+                        </div>
+
+                        <button id="jeop-reveal-btn" onclick="document.getElementById('jeop-answer-area').classList.remove('hidden'); this.classList.add('hidden');" class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-4 px-10 rounded-lg transition text-xl shadow-lg w-full max-w-sm mx-auto font-display tracking-widest">Reveal Answer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS VIEW -->
+        <div id="view-results" class="view text-center">
+            <div class="glass gold-border rounded-3xl p-10 max-w-lg mx-auto animate-pop-in">
+                <div class="text-7xl mb-6">🏆</div>
+                <h2 class="text-4xl font-display text-yellow-400 mb-2">Game Over!</h2>
+                <p id="results-message" class="text-lg text-slate-300 mb-8"></p>
+                <div class="bg-black/40 rounded-xl p-6 mb-8 border border-white/10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Final Score</span>
+                    <span id="results-score" class="text-5xl font-display text-white">0</span>
+                </div>
+                <button onclick="showView('dashboard')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded text-lg transition border border-slate-600 tracking-widest uppercase">Return to Menu</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GAME LOGIC SCRIPTS -->
+    <script>
+        // ==========================================
+        // DATA BANKS based on User Worksheets
+        // ==========================================
+
+        const collocationsData = [
+            { noun: "RESPONSIBILITY", valid: ["take", "accept", "claim", "deny", "huge"], fake: ["make", "build", "face", "cultural", "written"] },
+            { noun: "CONSEQUENCES", valid: ["face", "suffer", "negative", "serious", "severe"], fake: ["give", "ask for", "carry out", "ancient", "national"] },
+            { noun: "PERMISSION", valid: ["ask for", "grant", "give", "deny", "written"], fake: ["take", "face", "protect", "build", "unearth"] },
+            { noun: "AN EXCAVATION", valid: ["carry out", "lead", "begin", "conduct", "massive"], fake: ["suffer", "grant", "provide", "ancient", "protect"] },
+            { noun: "HERITAGE", valid: ["cultural", "national", "rich", "protect", "preserve"], fake: ["written", "serious", "face", "offer", "advanced"] },
+            { noun: "JUSTIFICATION", valid: ["provide", "offer", "give", "legal", "moral"], fake: ["take", "suffer", "ancient", "human", "destroy"] },
+            { noun: "ARTIFACTS", valid: ["ancient", "priceless", "rare", "discover", "unearth"], fake: ["advanced", "written", "negative", "grant", "face"] },
+            { noun: "CIVILIZATION", valid: ["ancient", "advanced", "human", "build", "collapse"], fake: ["priceless", "legal", "written", "deny", "carry out"] }
+        ];
+
+        const clashGrammar = [
+            "MUST HAVE (Past Certainty)", "MIGHT HAVE (Past Possibility)", "CAN'T HAVE (Past Negative Certainty)", 
+            "MUST BE (Present Certainty)", "MIGHT BE (Present Possibility)", "COULD BE (Present Possibility)",
+            "WILL PROBABLY (Future Prediction)"
+        ];
+
+        const hangmanWords = [
+            { word: "RESPONSIBILITY", clue: "You must TAKE this when you make a mistake." },
+            { word: "CONSEQUENCES", clue: "You will FACE these if you steal an artifact." },
+            { word: "EXCAVATION", clue: "Archaeologists CARRY OUT this digging process." },
+            { word: "PERMISSION", clue: "Lord Elgin claimed he was GRANTED this by the Empire." },
+            { word: "JUSTIFICATION", clue: "Museums PROVIDE this as a reason for keeping artifacts." },
+            { word: "HERITAGE", clue: "We must PROTECT our cultural ________." },
+            { word: "ARTIFACTS", clue: "Scientists UNEARTH these ancient, priceless objects." },
+            { word: "CIVILIZATION", clue: "The Romans built an ADVANCED ________." }
+        ];
+
+        const jeopardyData = [
+            {
+                category: "Match the Verb",
+                questions: [
+                    { q: "What verb goes with 'an excavation'? (e.g. to ____ an excavation)", a: "Carry out / Lead / Conduct / Begin" },
+                    { q: "What verb goes with 'consequences'? (e.g. to ____ consequences)", a: "Face / Suffer / Accept" },
+                    { q: "What verb goes with 'permission'? (e.g. to ____ permission)", a: "Grant / Ask for / Give / Deny" },
+                    { q: "What verb goes with 'responsibility'? (e.g. to ____ responsibility)", a: "Take / Accept / Claim" }
+                ]
+            },
+            {
+                category: "Match the Adjective",
+                questions: [
+                    { q: "What adjective goes with 'heritage'? (e.g. ____ heritage)", a: "Cultural / National / Rich" },
+                    { q: "What adjective goes with 'artifacts'? (e.g. ____ artifacts)", a: "Ancient / Priceless / Rare / Historical" },
+                    { q: "What adjective goes with 'civilization'? (e.g. ____ civilization)", a: "Ancient / Advanced / Human" },
+                    { q: "What adjective goes with 'justification'? (e.g. ____ justification)", a: "Legal / Moral / Clear" }
+                ]
+            },
+            {
+                category: "Sentence Fixer",
+                questions: [
+                    { q: "Fix the error: 'He must to take responsibility for the mistake.'", a: "He must take responsibility for the mistake. (No 'to' after modals)" },
+                    { q: "Fix the error: 'They might facing serious consequences.'", a: "They might face serious consequences. (Base verb after modal)" },
+                    { q: "Fix the error: 'The museum can't has granted permission.'", a: "The museum can't have granted permission. (Always 'have', never 'has')" },
+                    { q: "Fix the error: 'It must been an advanced civilization.'", a: "It must have been an advanced civilization. (Missing 'have')" }
+                ]
+            },
+            {
+                category: "Construct & Speculate",
+                questions: [
+                    { q: "Construct a sentence using 'MIGHT HAVE' + 'UNEARTHED ARTIFACTS'.", a: "(Teacher evaluates the team's sentence for grammar correctness)" },
+                    { q: "Construct a sentence using 'CAN'T HAVE' + 'TAKEN RESPONSIBILITY'.", a: "(Teacher evaluates the team's sentence for grammar correctness)" },
+                    { q: "Construct a sentence using 'MUST BE' + 'CULTURAL HERITAGE'.", a: "(Teacher evaluates the team's sentence for grammar correctness)" },
+                    { q: "Construct a sentence using 'WILL PROBABLY' + 'FACE CONSEQUENCES'.", a: "(Teacher evaluates the team's sentence for grammar correctness)" }
+                ]
+            }
+        ];
+
+        // ==========================================
+        // GLOBAL UTILS
+        // ==========================================
+        let currentGame = '';
+        let score = 0;
+        let timerInterval;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            clearInterval(timerInterval);
+        }
+
+        function startGame(type) {
+            currentGame = type;
+            score = 0;
+            if (type === 'collocations') initCollocations();
+            if (type === 'hangman') initHangman();
+            if (type === 'clash') initClash();
+            if (type === 'jeopardy') initJeopardy();
+        }
+
+        function endGame(message) {
+            clearInterval(timerInterval);
+            document.getElementById('results-message').textContent = message;
+            document.getElementById('results-score').textContent = score;
+            showView('results');
+        }
+
+        // ==========================================
+        // GAME 1: COLLOCATION CONNECT
+        // ==========================================
+        let colTime = 60, colDeck = [], currentCol = null;
+        
+        function initCollocations() {
+            colTime = 60; score = 0; colDeck = shuffle([...collocationsData]);
+            document.getElementById('col-score').textContent = `Score: ${score}`;
+            showView('collocations'); nextCollocation();
+            
+            timerInterval = setInterval(() => {
+                colTime--;
+                const bar = document.getElementById('col-timer-bar');
+                bar.style.width = `${(colTime / 60) * 100}%`;
+                if(colTime <= 15) bar.style.backgroundColor = '#ef4444'; // Red warning
+                else bar.style.backgroundColor = '#10b981'; // Green
+                
+                if (colTime <= 0) endGame("Time's Up!");
+            }, 1000);
+        }
+
+        function nextCollocation() {
+            const area = document.getElementById('col-play-area');
+            area.classList.remove('animate-pop-in'); void area.offsetWidth; area.classList.add('animate-pop-in');
+            
+            if (colDeck.length === 0) colDeck = shuffle([...collocationsData]);
+            currentCol = colDeck.pop();
+            
+            document.getElementById('col-target-word').textContent = currentCol.noun;
+            
+            // Get 1 correct answer and 3 fake answers
+            const correctAns = shuffle([...currentCol.valid])[0];
+            let fakes = shuffle([...currentCol.fake]).slice(0, 3);
+            
+            const options = shuffle([{w: correctAns, c: true}, ...fakes.map(f => ({w: f, c: false}))]);
+            const container = document.getElementById('col-options');
+            container.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-xl border border-slate-600 shadow transition text-lg uppercase tracking-wider";
+                btn.textContent = opt.w;
+                btn.onclick = () => {
+                    Array.from(container.children).forEach(b => b.disabled = true);
+                    if(opt.c) {
+                        btn.classList.add('bg-emerald-600', 'border-emerald-400');
+                        btn.classList.remove('bg-slate-800');
+                        score += 10;
+                        document.getElementById('col-score').textContent = `Score: ${score}`;
+                        setTimeout(nextCollocation, 600);
+                    } else {
+                        btn.classList.add('bg-rose-600', 'border-rose-400', 'animate-shake');
+                        btn.classList.remove('bg-slate-800');
+                        colTime = Math.max(0, colTime - 5); // Penalty
+                        setTimeout(nextCollocation, 1000);
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // ==========================================
+        // GAME 2: HANGMAN
+        // ==========================================
+        let hmWords = [], hmIdx = 0, hmTarget = '', hmGuessed = new Set(), hmLives = 5;
+        const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+
+        function initHangman() {
+            score = 0; hmIdx = 0; hmWords = shuffle([...hangmanWords]);
+            showView('hangman'); loadHmWord();
+        }
+
+        function loadHmWord() {
+            if (hmIdx >= 5) { score += 100; endGame("Excavation Complete!"); return; }
+            hmTarget = hmWords[hmIdx].word; hmGuessed.clear(); hmLives = 5;
+            document.getElementById('hm-score').textContent = `Score: ${score}`;
+            document.getElementById('hm-clue').textContent = `"${hmWords[hmIdx].clue}"`;
+            renderHm();
+        }
+
+        function renderHm() {
+            // Lives
+            const livesDiv = document.getElementById('hm-lives-display');
+            livesDiv.innerHTML = '';
+            for(let i=0; i<5; i++) livesDiv.innerHTML += `<span class="${i < hmLives ? '' : 'opacity-20 grayscale'}">🖌️</span>`;
+
+            // Slots
+            const slots = document.getElementById('hm-slots'); slots.innerHTML = '';
+            let won = true;
+            for(let char of hmTarget) {
+                const d = document.createElement('div');
+                if(char === ' ') { d.className = "w-4"; }
+                else if(hmGuessed.has(char)) { d.className = "letter-tile filled"; d.textContent = char; }
+                else { d.className = "letter-tile empty"; d.textContent = ''; won = false; }
+                slots.appendChild(d);
+            }
+
+            // Keyboard
+            const kb = document.getElementById('hm-keyboard'); kb.innerHTML = '';
+            ALPHABET.forEach(l => {
+                const btn = document.createElement('button');
+                const used = hmGuessed.has(l);
+                btn.className = `w-10 h-12 m-1 font-bold rounded shadow transition ${used ? (hmTarget.includes(l) ? 'bg-emerald-600 text-white opacity-50' : 'bg-slate-700 text-slate-500 opacity-50') : 'bg-slate-200 text-slate-900 hover:bg-white'}`;
+                btn.textContent = l; btn.disabled = used || hmLives <= 0 || won;
+                if(!btn.disabled) btn.onclick = () => {
+                    hmGuessed.add(l);
+                    if(!hmTarget.includes(l)) { hmLives--; score = Math.max(0, score-5); document.getElementById('hm-play-area').classList.add('animate-shake'); setTimeout(()=>document.getElementById('hm-play-area').classList.remove('animate-shake'),300); }
+                    else { score += 10; }
+                    document.getElementById('hm-score').textContent = `Score: ${score}`;
+                    renderHm();
+                };
+                kb.appendChild(btn);
+            });
+
+            if(won) { setTimeout(() => { hmIdx++; loadHmWord(); }, 1200); }
+            else if(hmLives <= 0) { 
+                // Reveal word
+                slots.innerHTML = '';
+                for(let char of hmTarget) {
+                    const d = document.createElement('div');
+                    d.className = "letter-tile filled"; d.style.background = "#ef4444"; d.textContent = char;
+                    slots.appendChild(d);
+                }
+                setTimeout(() => { hmIdx++; loadHmWord(); }, 2000); 
+            }
+        }
+
+        // ==========================================
+        // GAME 3: SENTENCE CLASH
+        // ==========================================
+        let clashScoreA = 0, clashScoreB = 0;
+        
+        function initClash() {
+            clashScoreA = 0; clashScoreB = 0;
+            document.getElementById('clash-score-a').textContent = 0;
+            document.getElementById('clash-score-b').textContent = 0;
+            showView('clash');
+            generateClashPrompt();
+        }
+
+        function updateClashScore(team, amt) {
+            if(team === 'A') { clashScoreA = Math.max(0, clashScoreA + amt); document.getElementById('clash-score-a').textContent = clashScoreA; }
+            if(team === 'B') { clashScoreB = Math.max(0, clashScoreB + amt); document.getElementById('clash-score-b').textContent = clashScoreB; }
+        }
+
+        function generateClashPrompt() {
+            const grammar = shuffle([...clashGrammar])[0];
+            const colloObj = shuffle([...collocationsData])[0];
+            const colloVerb = shuffle([...colloObj.valid])[0];
+            const vocab = `${colloVerb} ${colloObj.noun.toLowerCase()}`; // e.g. "take responsibility"
+
+            const gEl = document.getElementById('clash-grammar');
+            const vEl = document.getElementById('clash-vocab');
+            
+            // Animation
+            gEl.parentElement.classList.remove('animate-pop-in'); vEl.parentElement.classList.remove('animate-pop-in');
+            void gEl.parentElement.offsetWidth;
+            gEl.parentElement.classList.add('animate-pop-in'); vEl.parentElement.classList.add('animate-pop-in');
+
+            gEl.textContent = grammar;
+            vEl.textContent = vocab;
+        }
+
+        // ==========================================
+        // GAME 4: JEOPARDY
+        // ==========================================
+        let jScoreA = 0, jScoreB = 0, currJVal = 0, currJCell = null;
+
+        function initJeopardy() {
+            jScoreA = 0; jScoreB = 0; 
+            document.getElementById('jeop-score-a').textContent = 0; 
+            document.getElementById('jeop-score-b').textContent = 0;
+            
+            const board = document.getElementById('jeopardy-board'); 
+            board.innerHTML = '';
+            
+            // Headers
+            jeopardyData.forEach(cat => {
+                board.innerHTML += `<div class="bg-slate-800 text-yellow-400 font-display font-bold text-center py-3 px-2 uppercase border-b-4 border-slate-900 flex items-center justify-center h-16">${cat.category}</div>`;
+            });
+            
+            // Rows
+            for(let row=0; row<4; row++) {
+                jeopardyData.forEach((cat) => {
+                    const val = (row+1)*100;
+                    const cell = document.createElement('div');
+                    cell.className = "bg-slate-700 hover:bg-slate-600 text-yellow-300 font-display text-3xl font-black text-center py-6 cursor-pointer border-b-4 border-slate-800 transition active:translate-y-1";
+                    cell.textContent = val;
+                    cell.onclick = () => openJQuestion(cat.category, cat.questions[row], val, cell);
+                    board.appendChild(cell);
+                });
+            }
+            showView('jeopardy');
+        }
+
+        function openJQuestion(catName, qObj, val, cellEl) {
+            if(cellEl.classList.contains('opacity-0')) return;
+            currJVal = val; currJCell = cellEl;
+            
+            document.getElementById('jeop-cat-val').textContent = `${catName} for ${val}`;
+            document.getElementById('jeop-q-text').textContent = qObj.q;
+            document.getElementById('jeop-a-text').textContent = qObj.a;
+            
+            document.getElementById('jeop-answer-area').classList.add('hidden');
+            document.getElementById('jeop-reveal-btn').classList.remove('hidden');
+            document.getElementById('jeop-modal').classList.remove('hidden');
+        }
+
+        function awardJeopardy(team) {
+            if(team===1) { jScoreA += currJVal; document.getElementById('jeop-score-a').textContent = jScoreA; }
+            if(team===2) { jScoreB += currJVal; document.getElementById('jeop-score-b').textContent = jScoreB; }
+            
+            currJCell.classList.add('opacity-0', 'cursor-default'); 
+            currJCell.classList.remove('hover:bg-slate-600', 'active:translate-y-1');
+            document.getElementById('jeop-modal').classList.add('hidden');
+            
+            // Win condition check
+            const allCells = document.getElementById('jeopardy-board').children;
+            let finished = true;
+            for(let i=4; i<allCells.length; i++) { if(!allCells[i].classList.contains('opacity-0')) finished = false; }
+            if(finished) { 
+                score = Math.max(jScoreA, jScoreB); 
+                setTimeout(()=>endGame(`Arena Closed! Team A: ${jScoreA} | Team B: ${jScoreB}`), 1000); 
+            }
+        }
+
+        // Initialize script logic (Not automatically starting a game, just standing by)
+    </script>
+</body>
+</html>
