@@ -542,25 +542,26 @@
         // GAME 3: SENTENCE CLASH
         // ==========================================
         let clashScoreA = 0, clashScoreB = 0, clashTimeLeft = 60, clashInitial = 60, clashIsRunning = false;
-        let clashDeck = [];
         
-        // Simple predefined sentences for the generator to pick from based on the drawn words
+        // Upgraded: Meaningful sentences with correct collocations
         const clashExamples = [
-            "The museum must take responsibility for the stolen artifacts.",
-            "If they repatriate the loot, they will avoid negative consequences.",
-            "They didn't ask for permission before the excavation started.",
-            "It is our heritage, and there is no justification for keeping it.",
-            "Ancient civilization left behind many priceless artifacts.",
-            "They will admit their mistake and take responsibility.",
-            "He got defensive when they tried to blame him for the missing exhibit.",
-            "The preservation of this legacy requires great care."
+            { words: ["admit", "responsibility", "loot"], text: "The museum must admit their mistake and take full responsibility for displaying the stolen loot." },
+            { words: ["repatriate", "artifacts", "heritage"], text: "They decided to repatriate the priceless artifacts because they belong to the nation's cultural heritage." },
+            { words: ["permission", "excavation", "consequences"], text: "If you carry out the excavation without official permission, you will face severe consequences." },
+            { words: ["justification", "exhibit", "legacy"], text: "There is no moral justification to exhibit items that were stolen from a conquered legacy." },
+            { words: ["civilization", "preservation", "artifacts"], text: "The preservation of these rare artifacts helps us understand how the ancient civilization thrived." },
+            { words: ["blame", "defensive", "responsibility"], text: "Instead of taking responsibility, the director got defensive and tried to shift the blame to the archaeologists." },
+            { words: ["loot", "repatriate", "justification"], text: "Some argue that protecting the loot from destruction is a legal justification to not repatriate it." },
+            { words: ["excavation", "civilization", "legacy"], text: "The massive excavation revealed the hidden legacy of a highly advanced human civilization." },
+            { words: ["permission", "artifacts", "exhibit"], text: "The museum asked for permission from the local government before adding the ancient artifacts to the new exhibit." },
+            { words: ["admit", "consequences", "blame"], text: "If they admit the truth, they will suffer negative consequences and take the blame for the missing items." },
+            { words: ["preservation", "heritage", "defensive"], text: "The historian became highly defensive when questioned about the museum's role in the preservation of national heritage." }
         ];
 
         function initClash() {
             clashScoreA = 0; clashScoreB = 0;
             document.getElementById('clash-score-a').textContent = 0;
             document.getElementById('clash-score-b').textContent = 0;
-            clashDeck = shuffle([...clashVocabList]);
             resetClashTimer();
             showView('clash');
             generateClashPrompt();
@@ -639,13 +640,10 @@
             
             document.getElementById('clash-example-box').classList.add('hidden');
 
-            // Refill deck if we don't have enough words for a draw
-            if (clashDeck.length < 2) {
-                clashDeck = shuffle([...clashVocabList]);
-            }
-
-            const numWords = 2;
-            const selectedWords = [clashDeck.pop(), clashDeck.pop()];
+            // Pick a random, high-quality pre-written scenario
+            const randomScenario = clashExamples[Math.floor(Math.random() * clashExamples.length)];
+            const selectedWords = randomScenario.words;
+            const numWords = selectedWords.length;
             
             const colors = [
                 "from-emerald-600 to-teal-800 border-emerald-400",
@@ -665,11 +663,8 @@
                 }
             });
 
-            // Generate a generic example sentence containing the selected words
-            let exampleStr = "The museum director talked about the " + selectedWords[0] + " and the " + selectedWords[1];
-            if (numWords === 3) exampleStr += " while considering the " + selectedWords[2];
-            exampleStr += ".";
-            document.getElementById('clash-example-text').textContent = `"${exampleStr}"`;
+            // Set the exact, meaningful sentence as the example
+            document.getElementById('clash-example-text').textContent = `"${randomScenario.text}"`;
         }
 
         // ==========================================
