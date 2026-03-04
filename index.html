@@ -220,6 +220,21 @@
                     </div>
                 </div>
 
+                <!-- Adjustable Timer -->
+                <div class="bg-black/30 border border-slate-600 rounded-2xl p-4 mb-8 text-center max-w-md mx-auto shadow-inner">
+                    <div class="text-5xl font-display text-white mb-3 tracking-widest" id="clash-timer-display">01:00</div>
+                    <div class="flex justify-center items-center gap-4 mb-4">
+                        <button onclick="adjustClashTimer(-10)" class="text-slate-400 hover:text-yellow-400 font-bold transition px-2">-10s</button>
+                        <span class="text-slate-500 text-xs uppercase tracking-widest font-bold">Adjust Time</span>
+                        <button onclick="adjustClashTimer(10)" class="text-slate-400 hover:text-yellow-400 font-bold transition px-2">+10s</button>
+                    </div>
+                    <div class="flex justify-center gap-3">
+                        <button onclick="startClashTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl transition shadow-[0_3px_0_#047857] active:translate-y-1 active:shadow-none">Start</button>
+                        <button onclick="pauseClashTimer()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-xl transition shadow-[0_3px_0_#b45309] active:translate-y-1 active:shadow-none">Pause</button>
+                        <button onclick="resetClashTimer()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-xl transition shadow-[0_3px_0_#475569] active:translate-y-1 active:shadow-none">Reset</button>
+                    </div>
+                </div>
+
                 <!-- Generator Area -->
                 <div class="bg-black/40 border border-slate-600 rounded-2xl p-8 text-center">
                     <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using all words below</p>
@@ -544,12 +559,13 @@
         // ==========================================
         // GAME 3: SENTENCE CLASH
         // ==========================================
-        let clashScoreA = 0, clashScoreB = 0;
+        let clashScoreA = 0, clashScoreB = 0, clashTimeLeft = 60, clashInitial = 60, clashIsRunning = false;
         
         function initClash() {
             clashScoreA = 0; clashScoreB = 0;
             document.getElementById('clash-score-a').textContent = 0;
             document.getElementById('clash-score-b').textContent = 0;
+            resetClashTimer();
             showView('clash');
             generateClashPrompt();
         }
@@ -557,6 +573,60 @@
         function updateClashScore(team, amt) {
             if(team === 'A') { clashScoreA = Math.max(0, clashScoreA + amt); document.getElementById('clash-score-a').textContent = clashScoreA; }
             if(team === 'B') { clashScoreB = Math.max(0, clashScoreB + amt); document.getElementById('clash-score-b').textContent = clashScoreB; }
+        }
+
+        function updateClashTimerDisplay() {
+            const d = document.getElementById('clash-timer-display');
+            let m = Math.floor(clashTimeLeft / 60).toString().padStart(2, '0');
+            let s = (clashTimeLeft % 60).toString().padStart(2, '0');
+            d.innerText = `${m}:${s}`;
+            
+            if (clashTimeLeft <= 10 && clashTimeLeft > 0) {
+                d.classList.add('text-red-500'); d.classList.remove('text-white');
+            } else {
+                d.classList.remove('text-red-500'); d.classList.add('text-white');
+            }
+        }
+
+        function adjustClashTimer(amt) {
+            if (!clashIsRunning) {
+                clashInitial = Math.max(10, clashInitial + amt);
+                clashTimeLeft = clashInitial;
+                updateClashTimerDisplay();
+            }
+        }
+
+        function startClashTimer() {
+            if (!clashIsRunning && clashTimeLeft > 0) {
+                clashIsRunning = true;
+                globalTimerInterval = setInterval(() => {
+                    clashTimeLeft--;
+                    updateClashTimerDisplay();
+                    if (clashTimeLeft <= 0) {
+                        clearInterval(globalTimerInterval);
+                        clashIsRunning = false;
+                        const d = document.getElementById('clash-timer-display');
+                        d.innerText = "TIME'S UP!";
+                        d.classList.add('text-red-500', 'animate-shake');
+                        setTimeout(() => d.classList.remove('animate-shake'), 500);
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseClashTimer() {
+            clashIsRunning = false;
+            clearInterval(globalTimerInterval);
+        }
+
+        function resetClashTimer() {
+            clashIsRunning = false;
+            clearInterval(globalTimerInterval);
+            clashTimeLeft = clashInitial;
+            const d = document.getElementById('clash-timer-display');
+            d.classList.remove('animate-shake', 'text-red-500');
+            d.classList.add('text-white');
+            updateClashTimerDisplay();
         }
 
         function generateClashPrompt() {
