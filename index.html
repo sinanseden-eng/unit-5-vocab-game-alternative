@@ -599,11 +599,11 @@
         function startClashTimer() {
             if (!clashIsRunning && clashTimeLeft > 0) {
                 clashIsRunning = true;
-                globalTimerInterval = setInterval(() => {
+                timerInterval = setInterval(() => {
                     clashTimeLeft--;
                     updateClashTimerDisplay();
                     if (clashTimeLeft <= 0) {
-                        clearInterval(globalTimerInterval);
+                        clearInterval(timerInterval);
                         clashIsRunning = false;
                         const d = document.getElementById('clash-timer-display');
                         d.innerText = "TIME'S UP!";
@@ -616,12 +616,12 @@
 
         function pauseClashTimer() {
             clashIsRunning = false;
-            clearInterval(globalTimerInterval);
+            clearInterval(timerInterval);
         }
 
         function resetClashTimer() {
             clashIsRunning = false;
-            clearInterval(globalTimerInterval);
+            clearInterval(timerInterval);
             clashTimeLeft = clashInitial;
             const d = document.getElementById('clash-timer-display');
             d.classList.remove('animate-shake', 'text-red-500');
