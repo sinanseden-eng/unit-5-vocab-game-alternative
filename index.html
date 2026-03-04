@@ -122,7 +122,7 @@
                 <div class="glass green-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('clash')">
                     <div class="text-5xl mb-4">⚔️</div>
                     <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">Sentence Clash</h2>
-                    <p class="text-slate-300 text-sm mb-6">Team vs Team! Construct a perfect sentence using a random Modal Verb + Collocation.</p>
+                    <p class="text-slate-300 text-sm mb-6">Team vs Team! Construct a perfect sentence using 2 or 3 random target words.</p>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
                 </div>
 
@@ -222,26 +222,14 @@
 
                 <!-- Generator Area -->
                 <div class="bg-black/40 border border-slate-600 rounded-2xl p-8 text-center">
-                    <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using both elements</p>
+                    <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using all words below</p>
                     
-                    <div class="flex flex-col md:flex-row justify-center items-center gap-6 mb-8">
-                        <!-- Element 1: Grammar -->
-                        <div class="bg-purple-900/60 border-2 border-purple-500 p-6 rounded-xl w-full md:w-1/3 shadow-lg">
-                            <span class="text-[10px] text-purple-300 uppercase tracking-widest block mb-2">Grammar (Modals)</span>
-                            <span id="clash-grammar" class="text-2xl font-black text-white uppercase tracking-wider">?</span>
-                        </div>
-                        
-                        <div class="text-4xl text-slate-500 font-black">+</div>
-                        
-                        <!-- Element 2: Collocation -->
-                        <div class="bg-emerald-900/60 border-2 border-emerald-500 p-6 rounded-xl w-full md:w-1/3 shadow-lg">
-                            <span class="text-[10px] text-emerald-300 uppercase tracking-widest block mb-2">Collocation</span>
-                            <span id="clash-vocab" class="text-2xl font-black text-white uppercase tracking-wider">?</span>
-                        </div>
+                    <div id="clash-words-container" class="flex flex-wrap justify-center items-center gap-4 mb-8 min-h-[100px]">
+                        <!-- Words injected by JS -->
                     </div>
 
                     <button onclick="generateClashPrompt()" class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-display font-bold text-xl py-4 px-12 rounded-full shadow-[0_5px_0_#a16207] active:translate-y-1 active:shadow-none transition-all">
-                        Draw New Prompt
+                        Draw New Words
                     </button>
                 </div>
             </div>
@@ -312,6 +300,14 @@
         // ==========================================
         // DATA BANKS based on User Worksheets
         // ==========================================
+
+        // Extracted flat list of all vocab for Sentence Clash
+        const clashVocabList = [
+            "responsibility", "consequences", "permission", "excavation", 
+            "heritage", "justification", "artifacts", "civilization",
+            "repatriate", "loot", "preservation", "exhibit",
+            "admit", "blame", "defensive", "legacy"
+        ];
 
         const collocationsData = [
             { noun: "RESPONSIBILITY", valid: ["take", "accept", "claim", "deny", "huge"], fake: ["make", "build", "face", "cultural", "written"] },
@@ -442,12 +438,13 @@
             const area = document.getElementById('col-play-area');
             area.classList.remove('animate-pop-in'); void area.offsetWidth; area.classList.add('animate-pop-in');
             
+            // Infinite Loop Logic: If deck is empty, reshuffle and start again
             if (colDeck.length === 0) colDeck = shuffle([...collocationsData]);
             currentCol = colDeck.pop();
             
             document.getElementById('col-target-word').textContent = currentCol.noun;
             
-            // Get 1 correct answer and 3 fake answers
+            // Get 1 correct answer and 3 fake answers (always randomized so it feels fresh)
             const correctAns = shuffle([...currentCol.valid])[0];
             let fakes = shuffle([...currentCol.fake]).slice(0, 3);
             
@@ -563,21 +560,39 @@
         }
 
         function generateClashPrompt() {
-            const grammar = shuffle([...clashGrammar])[0];
-            const colloObj = shuffle([...collocationsData])[0];
-            const colloVerb = shuffle([...colloObj.valid])[0];
-            const vocab = `${colloVerb} ${colloObj.noun.toLowerCase()}`; // e.g. "take responsibility"
-
-            const gEl = document.getElementById('clash-grammar');
-            const vEl = document.getElementById('clash-vocab');
+            const container = document.getElementById('clash-words-container');
+            container.innerHTML = '';
             
-            // Animation
-            gEl.parentElement.classList.remove('animate-pop-in'); vEl.parentElement.classList.remove('animate-pop-in');
-            void gEl.parentElement.offsetWidth;
-            gEl.parentElement.classList.add('animate-pop-in'); vEl.parentElement.classList.add('animate-pop-in');
+            // Animation reset
+            container.classList.remove('animate-pop-in');
+            void container.offsetWidth;
+            container.classList.add('animate-pop-in');
 
-            gEl.textContent = grammar;
-            vEl.textContent = vocab;
+            // Decide if we are drawing 2 or 3 words
+            const numWords = Math.random() > 0.5 ? 2 : 3;
+            
+            // Pull random words from the flat vocabulary list
+            const selectedWords = shuffle([...clashVocabList]).slice(0, numWords);
+            
+            const colors = [
+                "from-emerald-600 to-teal-800 border-emerald-400",
+                "from-purple-600 to-indigo-800 border-purple-400",
+                "from-rose-600 to-red-800 border-rose-400"
+            ];
+
+            selectedWords.forEach((word, index) => {
+                container.innerHTML += `
+                    <div class="bg-gradient-to-br ${colors[index]} border-2 p-6 rounded-xl shadow-lg flex-1 min-w-[200px] max-w-[300px]">
+                        <span class="text-[10px] text-white/70 uppercase tracking-widest block mb-2">Target Word ${index + 1}</span>
+                        <span class="text-2xl font-black text-white uppercase tracking-wider">${word}</span>
+                    </div>
+                `;
+                
+                // Add a '+' sign between words if it's not the last word
+                if (index < numWords - 1) {
+                    container.innerHTML += `<div class="text-4xl text-slate-500 font-black px-2">+</div>`;
+                }
+            });
         }
 
         // ==========================================
