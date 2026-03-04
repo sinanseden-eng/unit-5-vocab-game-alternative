@@ -543,19 +543,19 @@
         // ==========================================
         let clashScoreA = 0, clashScoreB = 0, clashTimeLeft = 60, clashInitial = 60, clashIsRunning = false;
         
-        // Upgraded: Meaningful sentences with correct collocations
+        // Upgraded: Meaningful sentences with correct collocations (Strictly TWO words)
         const clashExamples = [
-            { words: ["admit", "responsibility", "loot"], text: "The museum must admit their mistake and take full responsibility for displaying the stolen loot." },
-            { words: ["repatriate", "artifacts", "heritage"], text: "They decided to repatriate the priceless artifacts because they belong to the nation's cultural heritage." },
-            { words: ["permission", "excavation", "consequences"], text: "If you carry out the excavation without official permission, you will face severe consequences." },
-            { words: ["justification", "exhibit", "legacy"], text: "There is no moral justification to exhibit items that were stolen from a conquered legacy." },
-            { words: ["civilization", "preservation", "artifacts"], text: "The preservation of these rare artifacts helps us understand how the ancient civilization thrived." },
-            { words: ["blame", "defensive", "responsibility"], text: "Instead of taking responsibility, the director got defensive and tried to shift the blame to the archaeologists." },
-            { words: ["loot", "repatriate", "justification"], text: "Some argue that protecting the loot from destruction is a legal justification to not repatriate it." },
-            { words: ["excavation", "civilization", "legacy"], text: "The massive excavation revealed the hidden legacy of a highly advanced human civilization." },
-            { words: ["permission", "artifacts", "exhibit"], text: "The museum asked for permission from the local government before adding the ancient artifacts to the new exhibit." },
-            { words: ["admit", "consequences", "blame"], text: "If they admit the truth, they will suffer negative consequences and take the blame for the missing items." },
-            { words: ["preservation", "heritage", "defensive"], text: "The historian became highly defensive when questioned about the museum's role in the preservation of national heritage." }
+            { words: ["admit", "responsibility"], text: "The museum must admit their mistake and take full responsibility for displaying the stolen artifact." },
+            { words: ["repatriate", "heritage"], text: "They decided to repatriate the priceless artifacts because they belong to the nation's cultural heritage." },
+            { words: ["permission", "consequences"], text: "If you carry out the excavation without official permission, you will face severe consequences." },
+            { words: ["justification", "legacy"], text: "There is no moral justification to exhibit items that were stolen from a conquered legacy." },
+            { words: ["civilization", "preservation"], text: "The preservation of these rare artifacts helps us understand how the ancient civilization thrived." },
+            { words: ["defensive", "responsibility"], text: "Instead of taking responsibility, the director got defensive and tried to shift the blame." },
+            { words: ["loot", "justification"], text: "Some argue that protecting the loot from destruction is a legal justification to keep it." },
+            { words: ["excavation", "legacy"], text: "The massive excavation revealed the hidden legacy of a highly advanced human civilization." },
+            { words: ["permission", "exhibit"], text: "The museum asked for permission from the local government before adding the ancient artifacts to the new exhibit." },
+            { words: ["consequences", "blame"], text: "If they admit the truth, they will suffer negative consequences and take the blame for the missing items." },
+            { words: ["preservation", "defensive"], text: "The historian became highly defensive when questioned about the museum's role in the preservation of national heritage." }
         ];
 
         function initClash() {
