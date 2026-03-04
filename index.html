@@ -219,6 +219,15 @@
                 <div class="bg-black/40 border border-slate-600 rounded-2xl p-8 text-center">
                     <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using both words below</p>
                     <div id="clash-words-container" class="flex flex-wrap justify-center items-center gap-4 mb-8 min-h-[100px]"></div>
+                    
+                    <div class="mb-8 max-w-2xl mx-auto">
+                        <button onclick="toggleClashExample()" class="text-sm font-bold text-slate-400 hover:text-white underline transition mb-3">Teacher: Show Example Sentence</button>
+                        <div id="clash-example-box" class="hidden bg-indigo-900/40 border border-indigo-500/50 p-5 rounded-xl shadow-inner">
+                            <p class="text-indigo-300 font-bold text-xs uppercase tracking-widest mb-2">Example:</p>
+                            <p id="clash-example-text" class="text-white text-lg font-serif italic"></p>
+                        </div>
+                    </div>
+
                     <button onclick="generateClashPrompt()" class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-display font-bold text-xl py-4 px-12 rounded-full shadow-[0_5px_0_#a16207] active:translate-y-1 active:shadow-none transition-all">
                         Draw New Words
                     </button>
@@ -535,6 +544,18 @@
         let clashScoreA = 0, clashScoreB = 0, clashTimeLeft = 60, clashInitial = 60, clashIsRunning = false;
         let clashDeck = [];
         
+        // Simple predefined sentences for the generator to pick from based on the drawn words
+        const clashExamples = [
+            "The museum must take responsibility for the stolen artifacts.",
+            "If they repatriate the loot, they will avoid negative consequences.",
+            "They didn't ask for permission before the excavation started.",
+            "It is our heritage, and there is no justification for keeping it.",
+            "Ancient civilization left behind many priceless artifacts.",
+            "They will admit their mistake and take responsibility.",
+            "He got defensive when they tried to blame him for the missing exhibit.",
+            "The preservation of this legacy requires great care."
+        ];
+
         function initClash() {
             clashScoreA = 0; clashScoreB = 0;
             document.getElementById('clash-score-a').textContent = 0;
@@ -604,12 +625,19 @@
             updateClashTimerDisplay();
         }
 
+        function toggleClashExample() {
+            const box = document.getElementById('clash-example-box');
+            box.classList.toggle('hidden');
+        }
+
         function generateClashPrompt() {
             const container = document.getElementById('clash-words-container');
             container.innerHTML = '';
             container.classList.remove('animate-pop-in');
             void container.offsetWidth;
             container.classList.add('animate-pop-in');
+            
+            document.getElementById('clash-example-box').classList.add('hidden');
 
             // Refill deck if we don't have enough words for a draw
             if (clashDeck.length < 2) {
@@ -621,7 +649,8 @@
             
             const colors = [
                 "from-emerald-600 to-teal-800 border-emerald-400",
-                "from-purple-600 to-indigo-800 border-purple-400"
+                "from-purple-600 to-indigo-800 border-purple-400",
+                "from-rose-600 to-red-800 border-rose-400"
             ];
 
             selectedWords.forEach((word, index) => {
@@ -635,6 +664,12 @@
                     container.innerHTML += `<div class="text-4xl text-slate-500 font-black px-2">+</div>`;
                 }
             });
+
+            // Generate a generic example sentence containing the selected words
+            let exampleStr = "The museum director talked about the " + selectedWords[0] + " and the " + selectedWords[1];
+            if (numWords === 3) exampleStr += " while considering the " + selectedWords[2];
+            exampleStr += ".";
+            document.getElementById('clash-example-text').textContent = `"${exampleStr}"`;
         }
 
         // ==========================================
