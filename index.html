@@ -115,7 +115,7 @@
                 <div class="glass green-border rounded-2xl p-6 text-center flex flex-col justify-between game-btn cursor-pointer" onclick="startGame('clash')">
                     <div class="text-5xl mb-4">⚔️</div>
                     <h2 class="text-xl text-yellow-400 font-display font-bold mb-2">Sentence Clash</h2>
-                    <p class="text-slate-300 text-sm mb-6">Team vs Team! Construct a perfect sentence using 2 or 3 random target words.</p>
+                    <p class="text-slate-300 text-sm mb-6">Team vs Team! Construct a perfect sentence using exactly 2 random target words.</p>
                     <button class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded transition border border-slate-600">Play Now</button>
                 </div>
 
@@ -217,7 +217,7 @@
                 </div>
 
                 <div class="bg-black/40 border border-slate-600 rounded-2xl p-8 text-center">
-                    <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using all words below</p>
+                    <p class="text-slate-300 font-bold uppercase tracking-widest text-sm mb-6">Your Challenge: Construct a sentence using both words below</p>
                     <div id="clash-words-container" class="flex flex-wrap justify-center items-center gap-4 mb-8 min-h-[100px]"></div>
                     <button onclick="generateClashPrompt()" class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-display font-bold text-xl py-4 px-12 rounded-full shadow-[0_5px_0_#a16207] active:translate-y-1 active:shadow-none transition-all">
                         Draw New Words
@@ -533,11 +533,13 @@
         // GAME 3: SENTENCE CLASH
         // ==========================================
         let clashScoreA = 0, clashScoreB = 0, clashTimeLeft = 60, clashInitial = 60, clashIsRunning = false;
+        let clashDeck = [];
         
         function initClash() {
             clashScoreA = 0; clashScoreB = 0;
             document.getElementById('clash-score-a').textContent = 0;
             document.getElementById('clash-score-b').textContent = 0;
+            clashDeck = shuffle([...clashVocabList]);
             resetClashTimer();
             showView('clash');
             generateClashPrompt();
@@ -609,13 +611,17 @@
             void container.offsetWidth;
             container.classList.add('animate-pop-in');
 
-            const numWords = Math.random() > 0.5 ? 2 : 3;
-            const selectedWords = shuffle([...clashVocabList]).slice(0, numWords);
+            // Refill deck if we don't have enough words for a draw
+            if (clashDeck.length < 2) {
+                clashDeck = shuffle([...clashVocabList]);
+            }
+
+            const numWords = 2;
+            const selectedWords = [clashDeck.pop(), clashDeck.pop()];
             
             const colors = [
                 "from-emerald-600 to-teal-800 border-emerald-400",
-                "from-purple-600 to-indigo-800 border-purple-400",
-                "from-rose-600 to-red-800 border-rose-400"
+                "from-purple-600 to-indigo-800 border-purple-400"
             ];
 
             selectedWords.forEach((word, index) => {
